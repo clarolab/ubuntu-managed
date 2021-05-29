@@ -89,10 +89,12 @@ def parse_config_file():
         config_file = open("config", "r")
     except :
         print('securityCheck: error could not open config file')
-        return -1
+        return None
     try:
         for l in config_file.readlines():
-            var, val = l[:-1].split('=')
+            var, val = l.split('=')
+            var=var.strip()
+            val=val.strip()
             if (val.lower() == 'false'):
                 val=False
             elif (val.lower() == 'true'):
@@ -100,11 +102,12 @@ def parse_config_file():
             config_data[var]=val
     except :
         print('securityCheck: error parsing config file')
-        return -1
+        return None
 
-    if (set(config_data.keys()) != {'notifyOnSucceded', 'smtpServer', 'personalEmail', 'password', 'name', 'localEmail', 'managerEmail', 'companyName', 'senderEmail','verbose'}):
+    if (set(config_data.keys()) != {'notifyOnSucceded', 'smtpServer', 'personalEmail', 'password', 'name', 'localEmail', 'managerEmail', 'companyName', 'senderEmail','verbose'} or '' in config_data.values()):
        print('securityCheck: invalid config file')
-       return -1
+       return None
+    
 
     return config_data
 
@@ -112,21 +115,20 @@ def parse_config_file():
 
 config_data = parse_config_file()
 
-for arg in sys.argv:
-    if (arg == 'v' or arg == 'verbose'):
-        config_data['verbose'] = True
+if(config_data):
+    for arg in sys.argv:
+        if (arg == 'v' or arg == 'verbose'):
+            config_data['verbose'] = True
 
-
-body = get_body()
-if(config_data['notifyOnSucceded'] and body == ''):
-    body = 'success on all security checks'
-
-if(body != ''):
-    send_email(smtp_server=config_data['smtpServer'],
-    sender_email=config_data['senderEmail'],
-    password=config_data['password'],
-    recipient_email=[config_data['managerEmail'], config_data['personalEmail']],
-    body=body,
-    subject=f"security report for {config_data['name']}")
+    body = get_body()
+    if(config_data['notifyOnSucceded'] and not body):
+        body = 'success on all security checks'
+    if(body):
+        send_email(smtp_server=config_data['smtpServer'],
+        sender_email=config_data['senderEmail'],
+        password=config_data['password'],
+        recipient_email=[config_data['managerEmail'], config_data['personalEmail']],
+        body=body,
+        subject=f"security report for {config_data['name']}")
 
 
