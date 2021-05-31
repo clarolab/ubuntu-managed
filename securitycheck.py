@@ -54,10 +54,9 @@ def get_body():
         body += 'antivirus is not enabled'
 
     # Encryption
-    devices_staus = sub.check_output(('sudo', 'dmsetup', 'status')).decode('utf-8')
-    if(devices_staus.find('crypt') != -1):
+    devices_status = sub.check_output(('sudo', 'dmsetup', 'status')).decode('utf-8')
+    if(devices_status.find('crypt') == -1):
         body += 'device is unencripted'
-
 
     #crypt_status = sub.check_output(('sudo', 'cryptsetup', 'status', '/dev/mapper/sda5_crypt')).decode('utf-8')[:-1]
     #list_devices = sub.check_output(('sudo', 'blkid' )).decode('utf-8')[:-1]
