@@ -43,7 +43,7 @@ def get_body():
     ufw = sub.check_output(('sudo', 'ufw', 'status', 'VERBOSE')).decode('utf-8')
     firewall_status = re.findall('Status: (active|inactive)', ufw)
     if(firewall_status != ['active']):
-        body += 'firewall is not active'
+        body += 'firewall is not active\n'
 
     #antivirus
     hasAntiviurs = False
@@ -51,12 +51,12 @@ def get_body():
         hasAntiviurs = sub.check_output(('pgrep','freshclam')).decode('utf-8') != ''
     except:pass
     if(not hasAntiviurs):
-        body += 'antivirus is not enabled'
+        body += 'antivirus is not enabled\n'
 
     # Encryption
     devices_status = sub.check_output(('sudo', 'dmsetup', 'status')).decode('utf-8')
     if(devices_status.find('crypt') == -1):
-        body += 'device is unencripted'
+        body += 'device is unencripted\n'
 
     #crypt_status = sub.check_output(('sudo', 'cryptsetup', 'status', '/dev/mapper/sda5_crypt')).decode('utf-8')[:-1]
     #list_devices = sub.check_output(('sudo', 'blkid' )).decode('utf-8')[:-1]
