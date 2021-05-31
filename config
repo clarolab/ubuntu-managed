@@ -1,4 +1,4 @@
-[DEFAULT]
+[global]
 # your full name
 name=
 

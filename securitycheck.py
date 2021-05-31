@@ -102,7 +102,7 @@ def send_email(smtp_server, sender_email , password, recipient_email, body, subj
 def parse_config_file():
     config = configparser.ConfigParser()
     try:
-        config.read('myconfig')
+        config.read('config')
     except:
         print('securityCheck: config file could not be opened')
         return None
