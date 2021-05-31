@@ -5,7 +5,12 @@ import sys
 import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
+import configparser
+from time import sleep 
+
+#from email.mime.base import MIMEBase
+
+
 
 def get_body():
     body=''
@@ -66,9 +71,8 @@ def get_body():
     return body
  
 
-
 def send_email(smtp_server, sender_email , password, recipient_email, body, subject):
-
+    print('sdfsd')
     port = 465  # For SSL
     msg = MIMEMultipart()
     msg['From'] = sender_email
@@ -77,58 +81,57 @@ def send_email(smtp_server, sender_email , password, recipient_email, body, subj
     msg.attach(MIMEText(body,'plain'))
     message = msg.as_string()
     context = ssl.create_default_context()
-    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-        server.login(sender_email, password)
-        server.sendmail(sender_email, recipient_email, message)
-
+    
+    back_off = 4 
+    server=None
+    while(True):
+    
+        try:
+            server = smtplib.SMTP_SSL(smtp_server, port, context=context)
+            server.login(sender_email, password)
+        except:
+            if(back_off < 1024):back_off += back_off
+            print(f'securityCheck: server conection failed: trying again in {back_off} seconds')
+            sleep(back_off)
+        if(server):
+            print('email')
+            server.sendmail(sender_email, recipient_email, message)
+            server.close()
+            break
 
 def parse_config_file():
-    #user info
-    config_data={}
+    config = configparser.ConfigParser()
     try:
-        config_file = open("config", "r")
-    except :
-        print('securityCheck: error could not open config file')
-        return None
-    try:
-        for l in config_file.readlines():
-            var, val = l.split('=')
-            var=var.strip()
-            val=val.strip()
-            if (val.lower() == 'false'):
-                val=False
-            elif (val.lower() == 'true'):
-                val=True
-            config_data[var]=val
-    except :
-        print('securityCheck: error parsing config file')
+        config.read('myconfig')
+    except:
+        print('securityCheck: config file could not be opened')
         return None
 
-    if (set(config_data.keys()) != {'notifyOnSucceded', 'smtpServer', 'personalEmail', 'password', 'name', 'localEmail', 'managerEmail', 'companyName', 'senderEmail','verbose'} or '' in config_data.values()):
+    if (set({k for k in config['global'].keys()}) != set({'name','notifyonsucceded','companyname','verbose'})
+    or 
+    set({k for k in config['email'].keys()}) != set({'personalemail', 'smtpserver', 'localemail', 'senderemail', 'manageremail', 'password'})):
        print('securityCheck: invalid config file')
        return None
+    return config
     
 
-    return config_data
+config = parse_config_file()
 
-
-
-config_data = parse_config_file()
-
-if(config_data):
+if(config):
+    # read arguments pased
     for arg in sys.argv:
         if (arg == 'v' or arg == 'verbose'):
-            config_data['verbose'] = True
+            config['global']['verbose'] = True
 
     body = get_body()
-    if(config_data['notifyOnSucceded'] and not body):
+    if(config.getboolean('global','notifyOnSucceded',fallback=False) and not body):
         body = 'success on all security checks'
     if(body):
-        send_email(smtp_server=config_data['smtpServer'],
-        sender_email=config_data['senderEmail'],
-        password=config_data['password'],
-        recipient_email=[config_data['managerEmail'], config_data['personalEmail']],
+        send_email(smtp_server=config['email']['smtpServer'],
+        sender_email=config['email']['senderEmail'],
+        password=config['email']['password'],
+        recipient_email=[config['email']['managerEmail'], config['email']['personalEmail']],
         body=body,
-        subject=f"security report for {config_data['name']}")
+        subject=f"security report for {config['global']['name']}")
 
 

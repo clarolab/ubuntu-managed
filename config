@@ -1,10 +1,31 @@
+[DEFAULT]
+# your full name
 name=
-personalEmail=
-localEmail=true
-notifyOnSucceded=false
-managerEmail=
+
+# set to true if you want to notify even if all checks performed were successful
+# set to false if you only want to notify when a check fails
+notifyOnSucceded=
+
 companyName=
-smtpServer=
+
+# set to true if you want to see the results on stdout
+verbose=
+
+[email]
+
+# the email where you want to receive your notifications
+personalEmail=
+
+# send notificatoins over email localy 
+localEmail=
+
+managerEmail=
+
+# email account used to send notifications 
 senderEmail=
+
+# smtp server addres
+# if you want to use gmail use: smtpServer=smtp.gmail.com and visit https://myaccount.google.com/lesssecureapps to grant acccess
+smtpServer=
+
 password=
-verbose=false
