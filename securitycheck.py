@@ -72,7 +72,6 @@ def get_body():
  
 
 def send_email(smtp_server, sender_email , password, recipient_email, body, subject):
-    print('sdfsd')
     port = 465  # For SSL
     msg = MIMEMultipart()
     msg['From'] = sender_email
@@ -94,7 +93,7 @@ def send_email(smtp_server, sender_email , password, recipient_email, body, subj
             print(f'securityCheck: server conection failed: trying again in {back_off} seconds')
             sleep(back_off)
         if(server):
-            print('email')
+            print('sending email..')
             server.sendmail(sender_email, recipient_email, message)
             server.close()
             break
@@ -135,3 +134,4 @@ if(config):
         subject=f"security report for {config['global']['name']}")
 
 
+print('done')
